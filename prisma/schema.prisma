@@ -1,0 +1,1715 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model activity_logs {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt    @db.UnsignedBigInt
+  action     String
+  source     String
+  ip_address String
+  location   String
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "activity_logs_user_id_foreign")
+
+  @@index([user_id], map: "activity_logs_user_id_foreign")
+}
+
+model admin_banks {
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  unique_code            String?   @unique(map: "admin_banks_unique_code_unique") @db.VarChar(180)
+  account_holder_name    String?
+  account_holder_address String?
+  bank_name              String?
+  bank_address           String?
+  country                String?
+  swift_code             String?
+  iban                   String?
+  note                   String?
+  status                 Int       @default(1) @db.TinyInt
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+}
+
+model admin_give_coin_histories {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt
+  wallet_id  BigInt
+  amount     Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model admin_receive_token_transaction_histories {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  deposit_id       BigInt
+  type             Int       @default(1) @db.TinyInt
+  unique_code      String?   @unique(map: "admin_receive_token_transaction_histories_unique_code_unique") @db.VarChar(180)
+  amount           Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  fees             Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  to_address       String
+  from_address     String
+  transaction_hash String
+  status           Int       @default(0) @db.TinyInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model admin_send_coin_histories {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt
+  wallet_id  BigInt
+  amount     Decimal   @db.Decimal(29, 18)
+  updated_by BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model admin_settings {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  slug       String    @unique(map: "admin_settings_slug_unique") @db.VarChar(180)
+  value      String?   @db.LongText
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model admin_wallet_deduct_histories {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id       BigInt    @db.UnsignedBigInt
+  wallet_id     BigInt    @db.UnsignedBigInt
+  updated_by    BigInt    @db.UnsignedBigInt
+  old_balance   Decimal   @db.Decimal(19, 8)
+  deduct_amount Decimal   @db.Decimal(19, 8)
+  new_balance   Decimal   @db.Decimal(19, 8)
+  reason        String    @db.Text
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+}
+
+model affiliation_codes {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt    @db.UnsignedBigInt
+  code       String    @unique(map: "affiliation_codes_code_unique") @db.VarChar(180)
+  status     Int       @default(1)
+  deleted_at DateTime? @db.Timestamp(0)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "affiliation_codes_user_id_foreign")
+
+  @@index([user_id], map: "affiliation_codes_user_id_foreign")
+}
+
+model affiliation_histories {
+  id                                          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id                                     BigInt    @db.UnsignedBigInt
+  child_id                                    BigInt    @db.UnsignedBigInt
+  amount                                      Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  system_fees                                 Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  transaction_id                              BigInt?
+  level                                       Int
+  order_type                                  Int?
+  status                                      Int       @default(0)
+  coin_type                                   String?
+  wallet_id                                   BigInt?
+  deleted_at                                  DateTime? @db.Timestamp(0)
+  created_at                                  DateTime? @db.Timestamp(0)
+  updated_at                                  DateTime? @db.Timestamp(0)
+  users_affiliation_histories_child_idTousers users     @relation("affiliation_histories_child_idTousers", fields: [child_id], references: [id], map: "affiliation_histories_child_id_foreign")
+  users_affiliation_histories_user_idTousers  users     @relation("affiliation_histories_user_idTousers", fields: [user_id], references: [id], map: "affiliation_histories_user_id_foreign")
+
+  @@index([child_id], map: "affiliation_histories_child_id_foreign")
+  @@index([user_id], map: "affiliation_histories_user_id_foreign")
+}
+
+model announcements {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title       String
+  slug        String
+  description String?   @db.LongText
+  image       String?
+  status      Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model banks {
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  account_holder_name    String?
+  account_holder_address String?
+  bank_name              String?
+  bank_address           String?
+  country                String?
+  swift_code             String?
+  iban                   String?
+  note                   String?   @db.Text
+  status                 Int       @default(1) @db.TinyInt
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+}
+
+model buy_coin_histories {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  address            String
+  type               Int       @db.TinyInt
+  user_id            BigInt
+  coin               Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  btc                Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  doller             Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  transaction_id     String?
+  status             Int       @default(0) @db.TinyInt
+  admin_confirmation Int       @default(0) @db.TinyInt
+  confirmations      Int       @default(0)
+  bank_sleep         String?
+  bank_id            Int?
+  coin_type          String?
+  phase_id           BigInt?
+  referral_level     Int?
+  fees               Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  bonus              Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  referral_bonus     Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  requested_amount   Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  stripe_token       String?
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model buy_coin_referral_histories {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id     BigInt
+  wallet_id   BigInt
+  buy_id      BigInt
+  phase_id    BigInt
+  child_id    BigInt
+  level       Int
+  system_fees Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  amount      Decimal   @default(0.00000000) @db.Decimal(13, 8)
+  status      Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model buys {
+  id                       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id                  BigInt    @db.UnsignedBigInt
+  condition_buy_id         BigInt?   @db.UnsignedBigInt
+  trade_coin_id            Int
+  base_coin_id             Int
+  amount                   Decimal   @db.Decimal(19, 8)
+  price                    Decimal   @db.Decimal(19, 8)
+  processed                Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  virtual_amount           Decimal   @db.Decimal(19, 8)
+  status                   Boolean   @default(false)
+  is_bot                   Int       @default(0) @db.TinyInt
+  btc_rate                 Decimal   @db.Decimal(19, 8)
+  is_market                Boolean   @default(false)
+  is_conditioned           Boolean   @default(false)
+  category                 Int       @default(1) @db.TinyInt
+  maker_fees               Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  taker_fees               Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  request_amount           Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  processed_request_amount Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  deleted_at               DateTime? @db.Timestamp(0)
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+
+  @@index([base_coin_id], map: "buys_base_coin_id_index")
+  @@index([trade_coin_id], map: "buys_trade_coin_id_index")
+}
+
+model co_wallet_withdraw_approvals {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  temp_withdraw_id BigInt
+  wallet_id        BigInt
+  user_id          BigInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model coin_pairs {
+  id                      BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+  parent_coin_id          Int
+  child_coin_id           Int
+  value                   Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  volume                  Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  change                  Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  high                    Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  low                     Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  initial_price           Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  price                   Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  status                  Int                      @default(1) @db.TinyInt
+  is_default              Int                      @default(0) @db.TinyInt
+  bot_possible            Int                      @default(1) @db.TinyInt
+  is_token                Int                      @default(0) @db.TinyInt
+  bot_trading_sell        Int                      @default(1) @db.TinyInt
+  bot_trading_buy         Int                      @default(1) @db.TinyInt
+  bot_trading             Int                      @default(1) @db.TinyInt
+  enable_future_trade     Int                      @default(0) @db.TinyInt
+  maintenance_margin_rate Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  minimum_amount_future   Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  leverage_fee            Decimal                  @default(0.00) @db.Decimal(8, 2)
+  max_leverage            Int                      @default(0)
+  margin_type             Int                      @default(1) @db.TinyInt
+  is_chart_updated        Int                      @default(0) @db.TinyInt
+  deleted_at              DateTime?                @db.Timestamp(0)
+  created_at              DateTime?                @db.Timestamp(0)
+  updated_at              DateTime?                @db.Timestamp(0)
+  pair_decimal            Int                      @default(2) @db.TinyInt
+  bot_operation           coin_pairs_bot_operation @default(random)
+  bot_percentage          Decimal                  @default(0.00000000) @db.Decimal(19, 8)
+  upper_threshold         Decimal                  @default(0.000000000000000000) @db.Decimal(29, 18)
+  lower_threshold         Decimal                  @default(0.000000000000000000) @db.Decimal(29, 18)
+
+  @@unique([parent_coin_id, child_coin_id], map: "coin_pairs_parent_coin_id_child_coin_id_unique")
+  @@index([child_coin_id], map: "coin_pairs_child_coin_id_index")
+  @@index([parent_coin_id], map: "coin_pairs_parent_coin_id_index")
+}
+
+model coin_payment_network_fees {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  coin_type   String    @db.VarChar(80)
+  is_fiat     Int       @default(0) @db.TinyInt
+  last_update String
+  status      String
+  tx_fee      Decimal   @db.Decimal(19, 8)
+  rate_btc    Decimal   @db.Decimal(29, 18)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model coin_requests {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  amount             Decimal   @default(0.00000000) @db.Decimal(13, 8)
+  sender_user_id     BigInt
+  receiver_user_id   BigInt
+  sender_wallet_id   BigInt
+  receiver_wallet_id BigInt
+  status             Int       @default(0) @db.TinyInt
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model coin_settings {
+  id                             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  coin_id                        BigInt
+  bitgo_wallet_id                String?
+  bitgo_webhook_label            String?   @db.VarChar(180)
+  bitgo_webhook_type             String?   @db.VarChar(50)
+  bitgo_webhook_url              String?   @db.VarChar(180)
+  bitgo_webhook_numConfirmations String?   @db.VarChar(50)
+  bitgo_webhook_allToken         String?   @db.VarChar(50)
+  bitgo_webhook_id               String?   @db.VarChar(180)
+  bitgo_deleted_status           Int       @default(0) @db.TinyInt
+  bitgo_approvalsRequired        Int       @default(0) @db.TinyInt
+  bitgo_wallet_type              String?
+  bitgo_wallet                   String?   @db.Text
+  chain                          Int       @default(1)
+  webhook_status                 Int       @default(0) @db.TinyInt
+  coin_api_user                  String?
+  gas_limit                      Int?
+  contract_decimal               String?
+  wallet_key                     String?   @db.Text
+  wallet_address                 String?
+  contract_address               String?
+  chain_id                       String?
+  chain_link                     String?
+  contract_coin_name             String?
+  coin_api_pass                  String?   @db.Text
+  coin_api_host                  String?
+  coin_api_port                  String?
+  created_at                     DateTime? @db.Timestamp(0)
+  updated_at                     DateTime? @db.Timestamp(0)
+  check_encrypt                  Int       @default(0) @db.TinyInt
+}
+
+model coins {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name                 String
+  coin_type            String    @unique(map: "coins_coin_type_unique") @db.VarChar(20)
+  currency_type        Int       @default(1) @db.TinyInt
+  currency_id          Int?      @db.TinyInt
+  status               Int       @default(1) @db.TinyInt
+  admin_approval       Int       @default(1) @db.TinyInt
+  network              Int       @default(1) @db.TinyInt
+  is_withdrawal        Int       @default(1) @db.TinyInt
+  is_deposit           Int       @default(1) @db.TinyInt
+  is_demo_trade        Int       @default(0)
+  is_buy               Int       @default(1) @db.TinyInt
+  is_sell              Int       @default(1) @db.TinyInt
+  coin_icon            String?   @db.VarChar(50)
+  is_base              Boolean   @default(true)
+  is_currency          Boolean   @default(false)
+  is_primary           Boolean?  @unique(map: "coins_is_primary_unique")
+  is_wallet            Boolean   @default(false)
+  is_transferable      Boolean   @default(false)
+  is_virtual_amount    Boolean   @default(false)
+  trade_status         Int       @default(1) @db.TinyInt
+  sign                 String?
+  minimum_buy_amount   Decimal   @default(0.00000010) @db.Decimal(19, 8)
+  maximum_buy_amount   Decimal   @default(999999.00000000) @db.Decimal(19, 8)
+  minimum_sell_amount  Decimal   @default(0.00000010) @db.Decimal(19, 8)
+  maximum_sell_amount  Decimal   @default(999999.00000000) @db.Decimal(19, 8)
+  minimum_withdrawal   Decimal   @default(0.00000010) @db.Decimal(19, 8)
+  maximum_withdrawal   Decimal   @default(99999999.00000000) @db.Decimal(19, 8)
+  max_send_limit       Decimal   @default(0.00000010) @db.Decimal(19, 8)
+  withdrawal_fees      Decimal   @default(0.000000100000000000) @db.Decimal(29, 18)
+  withdrawal_fees_type Int       @default(2) @db.TinyInt
+  coin_price           Decimal   @default(1.00000000) @db.Decimal(19, 8)
+  ico_id               BigInt    @default(0) @db.UnsignedBigInt
+  is_listed            Int       @default(0) @db.TinyInt
+  last_block_number    BigInt    @default(0) @db.UnsignedBigInt
+  from_block_number    BigInt    @default(0) @db.UnsignedBigInt
+  to_block_number      BigInt    @default(0) @db.UnsignedBigInt
+  last_timestamp       BigInt    @default(0) @db.UnsignedBigInt
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+  decimal              Int       @default(18)
+  sync_rate_status     Int       @default(0) @db.TinyInt
+  convert_status       Int       @default(0) @db.TinyInt
+  min_convert_amount   Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  max_convert_amount   Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  convert_fee_type     Int       @default(1) @db.TinyInt
+  convert_fee          Decimal   @default(0.00000000) @db.Decimal(29, 8)
+  market_cap           Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model condition_buys {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id       BigInt    @db.UnsignedBigInt
+  trade_coin_id Int
+  base_coin_id  Int
+  amount        Decimal   @db.Decimal(19, 8)
+  price         Decimal   @db.Decimal(19, 8)
+  status        Boolean   @default(false)
+  btc_rate      Decimal   @db.Decimal(19, 8)
+  category      Int       @default(1) @db.TinyInt
+  maker_fees    Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  taker_fees    Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  deleted_at    DateTime? @db.Timestamp(0)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model condition_sells {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt    @db.UnsignedBigInt
+  condition_buy_id BigInt    @db.UnsignedBigInt
+  trade_coin_id    Int
+  base_coin_id     Int
+  amount           Decimal   @db.Decimal(19, 8)
+  price            Decimal   @db.Decimal(19, 8)
+  status           Boolean   @default(false)
+  btc_rate         Decimal   @db.Decimal(19, 8)
+  category         Int       @default(1) @db.TinyInt
+  maker_fees       Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  taker_fees       Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  deleted_at       DateTime? @db.Timestamp(0)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model contact_us {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String
+  email       String
+  phone       String?
+  address     String?
+  description String
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model country_lists {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  key        String
+  value      String
+  status     Int       @default(1) @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model currency_deposit_histories {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id        Int       @db.UnsignedInt
+  payment_id     Int       @db.UnsignedInt
+  payment_type   Int       @db.UnsignedTinyInt
+  wallet_id      Int       @db.UnsignedInt
+  coin_id        Int       @db.UnsignedInt
+  coin_type      String    @db.VarChar(15)
+  bank_id        Int?      @db.UnsignedInt
+  bank_recipt    String?
+  amount         Decimal   @default(0.00) @db.Decimal(29, 2)
+  status         Int       @default(0) @db.TinyInt
+  transaction_id String?
+  note           String?   @db.Text
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model currency_deposit_payment_methods {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title          String
+  payment_method Int       @db.TinyInt
+  status         Int       @default(1) @db.TinyInt
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+  type           String    @default("fiat-deposit") @db.VarChar(30)
+}
+
+model currency_deposits {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  unique_code       String    @unique(map: "currency_deposits_unique_code_unique") @db.VarChar(180)
+  user_id           BigInt
+  wallet_id         BigInt
+  from_wallet_id    BigInt?
+  payment_method_id BigInt
+  currency          String
+  currency_amount   Decimal   @db.Decimal(19, 8)
+  coin_amount       Decimal   @db.Decimal(19, 8)
+  rate              Decimal   @db.Decimal(19, 8)
+  status            Int       @default(0) @db.TinyInt
+  updated_by        BigInt?
+  bank_receipt      String?
+  bank_id           String?
+  transaction_id    String?
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+  fees_type         Int       @default(1) @db.TinyInt
+  fees              Decimal   @default(0.00000000) @db.Decimal(19, 8)
+}
+
+model currency_lists {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String
+  code       String    @unique(map: "currency_lists_code_unique") @db.VarChar(180)
+  symbol     String    @db.VarChar(50)
+  rate       Decimal   @default(1.00) @db.Decimal(19, 2)
+  status     Int       @default(1) @db.TinyInt
+  is_primary Int       @default(0) @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model currency_withdrawal_histories {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id      Int       @db.UnsignedInt
+  wallet_id    Int       @db.UnsignedInt
+  coin_id      Int       @db.UnsignedInt
+  bank_id      Int       @db.UnsignedInt
+  coin_type    String    @db.VarChar(20)
+  amount       Decimal   @default(0.00) @db.Decimal(29, 2)
+  fees         Decimal   @default(0.00000000) @db.Decimal(29, 8)
+  status       Int       @default(0) @db.TinyInt
+  payment_info String?   @db.Text
+  receipt      String?
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model custom_pages {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title       String    @db.VarChar(256)
+  key         String    @db.VarChar(256)
+  type        Int       @default(1) @db.TinyInt
+  data_order  Int       @default(0)
+  description String?   @db.LongText
+  status      Int       @default(1) @db.TinyInt
+  page_link   String?   @db.Text
+  page_type   Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model deposite_transactions {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  address            String
+  from_address       String?
+  fees               Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  sender_wallet_id   BigInt?
+  receiver_wallet_id BigInt    @db.UnsignedBigInt
+  address_type       String
+  coin_type          String?
+  amount             Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  btc                Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  doller             Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  transaction_id     String
+  status             Int       @default(0) @db.TinyInt
+  received_amount    Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  is_admin_receive   Int       @default(0) @db.TinyInt
+  network_type       String?
+  updated_by         BigInt?
+  confirmations      Int       @default(0)
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+  network_id         Int?      @db.UnsignedInt
+  coin_id            Int?      @db.UnsignedInt
+  block_number       String?
+}
+
+model dynamic_menus {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title      String?
+  icon       String?
+  parent_id  Int?      @db.TinyInt
+  data_order Int?
+  status     Int?      @db.TinyInt
+  login_type Int?      @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model estimate_gas_fees_transaction_histories {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  unique_code      String?   @unique(map: "estimate_gas_fees_transaction_histories_unique_code_unique") @db.VarChar(180)
+  deposit_id       BigInt
+  type             Int       @default(1) @db.TinyInt
+  wallet_id        BigInt
+  amount           Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  fees             Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  coin_type        String    @default("BTC")
+  admin_address    String
+  user_address     String
+  transaction_hash String
+  status           Int       @default(0) @db.TinyInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model faq_types {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String?
+  status     Int       @default(1) @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model faqs {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  question    String    @db.Text
+  answer      String    @db.LongText
+  status      Int       @default(1) @db.TinyInt
+  author      BigInt?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  faq_type_id BigInt?
+}
+
+model favourite_coin_pairs {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id       BigInt    @db.UnsignedBigInt
+  coin_pairs_id BigInt    @db.UnsignedBigInt
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([user_id, coin_pairs_id], map: "favourite_coin_pairs_user_id_coin_pairs_id_unique")
+}
+
+model favourite_order_books {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id       Int
+  type          String
+  base_coin_id  Int
+  trade_coin_id Int
+  price         Decimal   @db.Decimal(19, 8)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+}
+
+model fiat_withdrawal_currencies {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  currency_id BigInt
+  status      Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model fiat_withdrawals {
+  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id         BigInt    @db.UnsignedBigInt
+  bank_id         BigInt    @db.UnsignedBigInt
+  wallet_id       BigInt    @db.UnsignedBigInt
+  admin_id        BigInt?
+  currency        String    @db.VarChar(30)
+  coin_amount     Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  currency_amount Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  rate            Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  fees            Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  bank_slip       String?
+  status          Int       @default(0) @db.TinyInt
+  payment_info    String?   @db.Text
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+}
+
+model future_trade_balance_transfer_histories {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt    @db.UnsignedBigInt
+  spot_wallet_id   BigInt    @db.UnsignedBigInt
+  future_wallet_id BigInt    @db.UnsignedBigInt
+  amount           Decimal   @db.Decimal(19, 8)
+  transfer_from    Int       @db.TinyInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model future_trade_long_shorts {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid                  String    @unique(map: "future_trade_long_shorts_uid_unique")
+  side                 Int       @default(1) @db.TinyInt
+  user_id              BigInt    @db.UnsignedBigInt
+  base_coin_id         BigInt    @db.UnsignedBigInt
+  trade_coin_id        BigInt    @db.UnsignedBigInt
+  parent_id            BigInt?   @db.UnsignedBigInt
+  entry_price          Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  exist_price          Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  price                Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  avg_close_price      Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  pnl                  Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  amount_in_base_coin  Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  amount_in_trade_coin Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  take_profit_price    Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  stop_loss_price      Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  liquidation_price    Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  margin               Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  fees                 Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  comission            Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  executed_amount      Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  leverage             Int       @default(0)
+  margin_mode          Int       @default(1) @db.TinyInt
+  trade_type           Int       @default(1) @db.TinyInt
+  is_position          Int       @default(0) @db.TinyInt
+  future_trade_time    DateTime? @db.DateTime(0)
+  closed_time          DateTime? @db.DateTime(0)
+  status               Int       @default(0) @db.TinyInt
+  is_market            Int       @default(0) @db.TinyInt
+  order_type           Int       @default(1) @db.TinyInt
+  stop_price           Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  trigger_condition    Int       @default(0) @db.TinyInt
+  current_market_price Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+}
+
+model future_trade_transaction_histories {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt    @db.UnsignedBigInt
+  order_id         BigInt?   @db.UnsignedBigInt
+  future_wallet_id BigInt?   @db.UnsignedBigInt
+  coin_pair_id     BigInt?   @db.UnsignedBigInt
+  type             Int?      @db.TinyInt
+  amount           Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  coin_type        String?
+  symbol           String?
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model future_wallets {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  wallet_name String
+  user_id     BigInt    @db.UnsignedBigInt
+  coin_id     BigInt    @db.UnsignedBigInt
+  coin_type   String
+  balance     Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  status      Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model gift_card_banners {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid         String
+  title       String
+  sub_title   String
+  banner      String
+  category_id String
+  updated_by  Int       @db.UnsignedInt
+  status      Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model gift_card_categories {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid        String
+  name       String
+  status     Int       @default(1) @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model gift_card_redeem_histories {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid          String
+  gift_card_id Int       @db.UnsignedInt
+  receiver_id  Int       @db.UnsignedInt
+  coin_type    String
+  amount       Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  status       Int       @default(1) @db.TinyInt
+  updated_by   Int       @db.UnsignedInt
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model gift_cards {
+  id                  BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid                 String
+  gift_card_banner_id String
+  user_id             Int       @db.UnsignedInt
+  coin_type           String
+  wallet_type         Int       @db.UnsignedInt
+  amount              Decimal   @db.Decimal(29, 18)
+  fees                Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  redeem_code         String    @unique(map: "gift_cards_redeem_code_unique")
+  note                String?   @db.Text
+  owner_id            BigInt?   @db.UnsignedBigInt
+  is_ads_created      Int       @default(0) @db.TinyInt
+  lock                Int       @default(0) @db.TinyInt
+  status              Int       @default(1) @db.TinyInt
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+}
+
+model kyc_lists {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String?
+  type       Int?      @db.TinyInt
+  status     Int       @default(1) @db.TinyInt
+  image      String
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model landing_banners {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title       String
+  slug        String
+  description String?   @db.LongText
+  image       String?
+  status      Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model landing_features {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  feature_title String
+  description   String    @db.Text
+  feature_icon  String?
+  status        Int       @default(1) @db.TinyInt
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  feature_url   String?
+}
+
+model lang_names {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String
+  key        String    @db.VarChar(10)
+  status     Int       @default(1) @db.TinyInt
+  image      String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String
+  batch     Int
+}
+
+model notifications {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id           BigInt
+  title             String
+  notification_body String?   @db.LongText
+  type              Int       @default(1) @db.TinyInt
+  status            Int       @default(0) @db.TinyInt
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model oauth_access_tokens {
+  id         String    @id @db.VarChar(100)
+  user_id    BigInt?   @db.UnsignedBigInt
+  client_id  BigInt    @db.UnsignedBigInt
+  name       String?
+  scopes     String?   @db.Text
+  revoked    Boolean
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  expires_at DateTime? @db.DateTime(0)
+
+  @@index([user_id], map: "oauth_access_tokens_user_id_index")
+}
+
+model oauth_auth_codes {
+  id         String    @id @db.VarChar(100)
+  user_id    BigInt    @db.UnsignedBigInt
+  client_id  BigInt    @db.UnsignedBigInt
+  scopes     String?   @db.Text
+  revoked    Boolean
+  expires_at DateTime? @db.DateTime(0)
+
+  @@index([user_id], map: "oauth_auth_codes_user_id_index")
+}
+
+model oauth_clients {
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id                BigInt?   @db.UnsignedBigInt
+  name                   String
+  secret                 String?   @db.VarChar(100)
+  provider               String?
+  redirect               String    @db.Text
+  personal_access_client Boolean
+  password_client        Boolean
+  revoked                Boolean
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "oauth_clients_user_id_index")
+}
+
+model oauth_personal_access_clients {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  client_id  BigInt    @db.UnsignedBigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model oauth_refresh_tokens {
+  id              String    @id @db.VarChar(100)
+  access_token_id String    @db.VarChar(100)
+  revoked         Boolean
+  expires_at      DateTime? @db.DateTime(0)
+
+  @@index([access_token_id], map: "oauth_refresh_tokens_access_token_id_index")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String
+  token      String
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model permission_from_data {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  group      String    @db.VarChar(50)
+  action     String    @db.VarChar(50)
+  for        String    @db.VarChar(50)
+  route      String    @db.VarChar(50)
+  status     String?   @default("1")
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model permissions {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  role_id    Int       @db.UnsignedInt
+  action_id  Int?      @db.UnsignedInt
+  group      String    @db.VarChar(50)
+  action     String    @db.VarChar(50)
+  route      String    @db.VarChar(50)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String
+  tokenable_id   BigInt    @db.UnsignedBigInt
+  name           String
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model progress_statuses {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title            String?
+  description      String?   @db.Text
+  status           Int?      @db.TinyInt
+  progress_type_id Int?      @db.TinyInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model referral_sign_bonus_histories {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt
+  parent_id  BigInt
+  wallet_id  BigInt
+  amount     Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  status     Int       @default(1) @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model referral_users {
+  id                                    BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id                               BigInt    @unique(map: "referral_users_user_id_unique") @db.UnsignedBigInt
+  parent_id                             BigInt    @db.UnsignedBigInt
+  deleted_at                            DateTime? @db.Timestamp(0)
+  created_at                            DateTime? @db.Timestamp(0)
+  updated_at                            DateTime? @db.Timestamp(0)
+  users_referral_users_parent_idTousers users     @relation("referral_users_parent_idTousers", fields: [parent_id], references: [id], onDelete: Cascade, map: "referral_users_parent_id_foreign")
+  users_referral_users_user_idTousers   users     @relation("referral_users_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, map: "referral_users_user_id_foreign")
+
+  @@index([parent_id], map: "referral_users_parent_id_foreign")
+}
+
+model roles {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title      String    @db.VarChar(80)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model selected_coin_pairs {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id       Int
+  base_coin_id  Int
+  trade_coin_id Int
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([base_coin_id, user_id, trade_coin_id], map: "selected_coin_pairs_base_coin_id_user_id_trade_coin_id_unique")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model sells {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt    @db.UnsignedBigInt
+  condition_buy_id BigInt?   @db.UnsignedBigInt
+  trade_coin_id    Int
+  base_coin_id     Int
+  amount           Decimal   @db.Decimal(19, 8)
+  price            Decimal   @db.Decimal(19, 8)
+  processed        Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  virtual_amount   Decimal   @db.Decimal(19, 8)
+  status           Boolean   @default(false)
+  is_bot           Int       @default(0) @db.TinyInt
+  btc_rate         Decimal   @db.Decimal(19, 8)
+  is_market        Boolean   @default(false)
+  is_conditioned   Boolean   @default(false)
+  category         Int       @default(1) @db.TinyInt
+  maker_fees       Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  taker_fees       Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  deleted_at       DateTime? @db.Timestamp(0)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+
+  @@index([base_coin_id], map: "sells_base_coin_id_index")
+  @@index([trade_coin_id], map: "sells_trade_coin_id_index")
+}
+
+model send_mail_records {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt
+  email_type String?
+  status     Int       @default(1) @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model social_media {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  media_title String
+  media_link  String    @db.Text
+  media_icon  String?
+  status      Int       @default(1) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model staking_investment_payments {
+  id                    BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid                   String    @unique(map: "staking_investment_payments_uid_unique")
+  user_id               BigInt    @db.UnsignedBigInt
+  staking_investment_id BigInt    @db.UnsignedBigInt
+  wallet_id             BigInt    @db.UnsignedBigInt
+  coin_type             String
+  is_auto_renew         Int       @default(0) @db.TinyInt
+  total_investment      Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  total_bonus           Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  total_amount          Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  investment_status     Int       @default(5) @db.TinyInt
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+}
+
+model staking_investments {
+  id                      BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid                     String    @unique(map: "staking_investments_uid_unique")
+  staking_offer_id        BigInt    @db.UnsignedBigInt
+  user_id                 BigInt    @db.UnsignedBigInt
+  coin_type               String
+  period                  Int       @db.UnsignedInt
+  offer_percentage        Decimal   @db.Decimal(19, 8)
+  terms_type              Int       @db.TinyInt
+  minimum_maturity_period Int
+  auto_renew_status       Int       @default(0) @db.TinyInt
+  status                  Int       @default(1) @db.TinyInt
+  investment_amount       Decimal   @db.Decimal(19, 8)
+  earn_daily_bonus        Decimal   @db.Decimal(19, 8)
+  total_bonus             Decimal   @db.Decimal(19, 8)
+  auto_renew_from         BigInt?   @db.UnsignedBigInt
+  is_auto_renew           Int       @default(0) @db.TinyInt
+  created_at              DateTime? @db.Timestamp(0)
+  updated_at              DateTime? @db.Timestamp(0)
+}
+
+model staking_offers {
+  id                          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid                         String    @unique(map: "staking_offers_uid_unique")
+  created_by                  BigInt    @db.UnsignedBigInt
+  coin_type                   String
+  period                      Int       @db.UnsignedInt
+  offer_percentage            Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  minimum_investment          Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  maximum_investment          Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  terms_type                  Int       @default(1) @db.TinyInt
+  minimum_maturity_period     Int       @default(0)
+  terms_condition             String?   @db.LongText
+  registration_before         Int       @default(0)
+  phone_verification          Int       @default(0) @db.TinyInt
+  kyc_verification            Int       @default(0) @db.TinyInt
+  user_minimum_holding_amount Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  status                      Int       @default(1) @db.TinyInt
+  created_at                  DateTime? @db.Timestamp(0)
+  updated_at                  DateTime? @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model stop_limits {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt    @db.UnsignedBigInt
+  condition_buy_id BigInt?   @db.UnsignedBigInt
+  trade_coin_id    Int
+  base_coin_id     Int
+  stop             Decimal   @db.Decimal(19, 8)
+  limit_price      Decimal   @db.Decimal(19, 8)
+  amount           Decimal   @db.Decimal(19, 8)
+  order            String    @db.VarChar(11)
+  is_conditioned   Int       @default(0) @db.TinyInt
+  category         Int       @default(1) @db.TinyInt
+  maker_fees       Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  taker_fees       Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  status           Int       @default(0) @db.TinyInt
+  deleted_at       DateTime? @db.Timestamp(0)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model temp_withdraws {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id     BigInt
+  wallet_id   BigInt
+  withdraw_id BigInt?
+  amount      Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  address     String
+  message     String?   @db.Text
+  status      Int       @default(0) @db.TinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model third_party_kyc_details {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id     BigInt?   @db.UnsignedBigInt
+  kyc_type    Int?      @db.TinyInt
+  is_verified Int       @default(0) @db.TinyInt
+  key         String?
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model trade_referral_histories {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  trade_by          BigInt?   @db.UnsignedBigInt
+  user_id           BigInt?   @db.UnsignedBigInt
+  child_id          BigInt?   @db.UnsignedBigInt
+  amount            Decimal   @db.Decimal(19, 8)
+  percentage_amount Int?      @db.TinyInt
+  transaction_id    BigInt?   @db.UnsignedBigInt
+  level             Int?      @db.TinyInt
+  coin_type         String?
+  wallet_id         BigInt?   @db.UnsignedBigInt
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model transactions {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  transaction_id    String?   @db.VarChar(30)
+  base_coin_id      Int       @db.UnsignedInt
+  trade_coin_id     Int       @db.UnsignedInt
+  buy_id            BigInt    @db.UnsignedBigInt
+  sell_id           BigInt    @db.UnsignedBigInt
+  buy_user_id       BigInt    @db.UnsignedBigInt
+  sell_user_id      BigInt    @db.UnsignedBigInt
+  price_order_type  String?
+  amount            Decimal   @db.Decimal(19, 8)
+  price             Decimal   @db.Decimal(19, 8)
+  last_price        Decimal?  @db.Decimal(19, 8)
+  btc_rate          Decimal   @db.Decimal(19, 8)
+  btc               Decimal   @db.Decimal(19, 8)
+  total             Decimal   @db.Decimal(29, 18)
+  buy_fees          Decimal   @db.Decimal(29, 18)
+  sell_fees         Decimal   @db.Decimal(29, 18)
+  bot_order         Int       @default(0) @db.TinyInt
+  remove_from_chart Boolean   @default(false)
+  deleted_at        DateTime? @db.Timestamp(0)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+
+  @@index([base_coin_id], map: "transactions_base_coin_id_index")
+  @@index([trade_coin_id], map: "transactions_trade_coin_id_index")
+}
+
+model tv_chart_15mins {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  interval      Int       @db.UnsignedInt
+  base_coin_id  String    @db.VarChar(11)
+  trade_coin_id String    @db.VarChar(11)
+  open          Decimal   @db.Decimal(19, 8)
+  close         Decimal   @db.Decimal(19, 8)
+  high          Decimal   @db.Decimal(19, 8)
+  low           Decimal   @db.Decimal(19, 8)
+  volume        Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([base_coin_id, trade_coin_id, interval], map: "tv_chart_15mins_base_coin_id_trade_coin_id_interval_unique")
+  @@index([base_coin_id], map: "tv_chart_15mins_base_coin_id_index")
+  @@index([trade_coin_id], map: "tv_chart_15mins_trade_coin_id_index")
+}
+
+model tv_chart_1days {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  interval      Int       @db.UnsignedInt
+  base_coin_id  String    @db.VarChar(11)
+  trade_coin_id String    @db.VarChar(11)
+  open          Decimal   @db.Decimal(19, 8)
+  close         Decimal   @db.Decimal(19, 8)
+  high          Decimal   @db.Decimal(19, 8)
+  low           Decimal   @db.Decimal(19, 8)
+  volume        Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([base_coin_id, trade_coin_id, interval], map: "tv_chart_1days_base_coin_id_trade_coin_id_interval_unique")
+  @@index([base_coin_id], map: "tv_chart_1days_base_coin_id_index")
+  @@index([trade_coin_id], map: "tv_chart_1days_trade_coin_id_index")
+}
+
+model tv_chart_2hours {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  interval      Int       @db.UnsignedInt
+  base_coin_id  String    @db.VarChar(11)
+  trade_coin_id String    @db.VarChar(11)
+  open          Decimal   @db.Decimal(19, 8)
+  close         Decimal   @db.Decimal(19, 8)
+  high          Decimal   @db.Decimal(19, 8)
+  low           Decimal   @db.Decimal(19, 8)
+  volume        Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([base_coin_id, trade_coin_id, interval], map: "tv_chart_2hours_base_coin_id_trade_coin_id_interval_unique")
+  @@index([base_coin_id], map: "tv_chart_2hours_base_coin_id_index")
+  @@index([trade_coin_id], map: "tv_chart_2hours_trade_coin_id_index")
+}
+
+model tv_chart_30mins {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  interval      Int       @db.UnsignedInt
+  base_coin_id  String    @db.VarChar(11)
+  trade_coin_id String    @db.VarChar(11)
+  open          Decimal   @db.Decimal(19, 8)
+  close         Decimal   @db.Decimal(19, 8)
+  high          Decimal   @db.Decimal(19, 8)
+  low           Decimal   @db.Decimal(19, 8)
+  volume        Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([base_coin_id, trade_coin_id, interval], map: "tv_chart_30mins_base_coin_id_trade_coin_id_interval_unique")
+  @@index([base_coin_id], map: "tv_chart_30mins_base_coin_id_index")
+  @@index([trade_coin_id], map: "tv_chart_30mins_trade_coin_id_index")
+}
+
+model tv_chart_4hours {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  interval      Int       @db.UnsignedInt
+  base_coin_id  String    @db.VarChar(11)
+  trade_coin_id String    @db.VarChar(11)
+  open          Decimal   @db.Decimal(19, 8)
+  close         Decimal   @db.Decimal(19, 8)
+  high          Decimal   @db.Decimal(19, 8)
+  low           Decimal   @db.Decimal(19, 8)
+  volume        Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([base_coin_id, trade_coin_id, interval], map: "tv_chart_4hours_base_coin_id_trade_coin_id_interval_unique")
+  @@index([base_coin_id], map: "tv_chart_4hours_base_coin_id_index")
+  @@index([trade_coin_id], map: "tv_chart_4hours_trade_coin_id_index")
+}
+
+model tv_chart_5mins {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  interval      Int       @db.UnsignedInt
+  base_coin_id  String    @db.VarChar(11)
+  trade_coin_id String    @db.VarChar(11)
+  open          Decimal   @db.Decimal(19, 8)
+  close         Decimal   @db.Decimal(19, 8)
+  high          Decimal   @db.Decimal(19, 8)
+  low           Decimal   @db.Decimal(19, 8)
+  volume        Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@unique([base_coin_id, trade_coin_id, interval], map: "tv_chart_5mins_base_coin_id_trade_coin_id_interval_unique")
+  @@index([base_coin_id], map: "tv_chart_5mins_base_coin_id_index")
+  @@index([trade_coin_id], map: "tv_chart_5mins_trade_coin_id_index")
+}
+
+model user_banks {
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id                BigInt
+  account_holder_name    String?
+  account_holder_address String?
+  bank_name              String?
+  bank_address           String?
+  country                String?
+  swift_code             String?
+  iban                   String?
+  note                   String?   @db.Text
+  status                 Int       @default(1) @db.TinyInt
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+}
+
+model user_navbars {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title      String?
+  slug       String?
+  sub        Boolean   @default(false)
+  main_id    Int?      @db.UnsignedInt
+  status     Boolean   @default(true)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model user_settings {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt    @db.UnsignedBigInt
+  slug       String
+  value      String
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_settings_user_id_foreign")
+
+  @@index([user_id], map: "user_settings_user_id_foreign")
+}
+
+model user_verification_codes {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt    @db.UnsignedBigInt
+  code       String
+  status     Int       @default(0) @db.TinyInt
+  type       Int       @default(1) @db.TinyInt
+  expired_at DateTime  @db.DateTime(0)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model users {
+  id                                                          BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  first_name                                                  String
+  last_name                                                   String
+  nickname                                                    String?
+  email                                                       String                  @unique(map: "users_email_unique") @db.VarChar(180)
+  reset_code                                                  String?                 @unique(map: "users_reset_code_unique") @db.VarChar(180)
+  role                                                        Int                     @default(2)
+  role_id                                                     Int                     @db.UnsignedInt
+  super_admin                                                 Boolean                 @default(false)
+  status                                                      Int                     @default(1)
+  is_default                                                  Int                     @default(0) @db.TinyInt
+  delete_request                                              Int                     @default(0) @db.TinyInt
+  last_seen                                                   DateTime?               @db.Timestamp(0)
+  phone                                                       String?
+  phone_verified                                              Int                     @default(0) @db.TinyInt
+  country                                                     String?
+  gender                                                      Int                     @default(1) @db.TinyInt
+  birth_date                                                  String?
+  photo                                                       String?
+  g2f_enabled                                                 String?
+  google2fa_secret                                            String?
+  phone_enabled                                               String?
+  otp_code                                                    String?                 @db.VarChar(10)
+  email_enabled                                               String?
+  is_verified                                                 Int                     @default(0) @db.TinyInt
+  password                                                    String
+  language                                                    String                  @default("en")
+  currency                                                    String                  @default("USD")
+  device_id                                                   String?
+  device_type                                                 Int                     @default(1) @db.TinyInt
+  push_notification_status                                    Int                     @default(1) @db.TinyInt
+  email_notification_status                                   Int                     @default(1) @db.TinyInt
+  remember_token                                              String?                 @db.VarChar(100)
+  created_at                                                  DateTime?               @db.Timestamp(0)
+  updated_at                                                  DateTime?               @db.Timestamp(0)
+  delete_request_reason                                       String?                 @db.Text
+  api_access_allow_user                                       Int                     @default(1) @db.TinyInt
+  trade_access_allow_user                                     Int                     @default(1) @db.TinyInt
+  withdrawal_access_allow_user                                Int                     @default(1) @db.TinyInt
+  activity_logs                                               activity_logs[]
+  affiliation_codes                                           affiliation_codes[]
+  affiliation_histories_affiliation_histories_child_idTousers affiliation_histories[] @relation("affiliation_histories_child_idTousers")
+  affiliation_histories_affiliation_histories_user_idTousers  affiliation_histories[] @relation("affiliation_histories_user_idTousers")
+  referral_users_referral_users_parent_idTousers              referral_users[]        @relation("referral_users_parent_idTousers")
+  referral_users_referral_users_user_idTousers                referral_users?         @relation("referral_users_user_idTousers")
+  user_settings                                               user_settings[]
+  verification_details                                        verification_details[]
+  wallet_swap_histories                                       wallet_swap_histories[]
+  wallets                                                     wallets[]
+}
+
+model verification_details {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt    @db.UnsignedBigInt
+  field_name String
+  status     Int       @default(0) @db.TinyInt
+  photo      String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "verification_details_user_id_foreign")
+
+  @@index([user_id], map: "verification_details_user_id_foreign")
+}
+
+model wallet_address_histories {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id      Int?      @db.UnsignedInt
+  is_encrypted Int       @default(0) @db.TinyInt
+  coin_id      Int?      @db.UnsignedInt
+  network_id   Int?      @db.UnsignedInt
+  wallet_id    BigInt
+  address      String
+  coin_type    String    @default("BTC")
+  wallet_key   String?   @db.Text
+  public_key   String?   @db.Text
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  memo         String?
+}
+
+model wallet_co_users {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  wallet_id  BigInt
+  user_id    BigInt
+  status     Int       @default(1) @db.TinyInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model wallet_networks {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  wallet_id    BigInt    @db.UnsignedBigInt
+  coin_id      BigInt    @db.UnsignedBigInt
+  address      String?
+  network_type String?
+  status       Int       @default(1) @db.TinyInt
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+
+  @@unique([wallet_id, network_type], map: "wallet_networks_wallet_id_network_type_unique")
+}
+
+model wallet_swap_histories {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt    @db.UnsignedBigInt
+  from_wallet_id   BigInt
+  to_wallet_id     BigInt
+  from_coin_type   String
+  to_coin_type     String
+  requested_amount Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  converted_amount Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  rate             Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  status           Int       @default(1) @db.TinyInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  users            users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "wallet_swap_histories_user_id_foreign")
+
+  @@index([user_id], map: "wallet_swap_histories_user_id_foreign")
+}
+
+model wallets {
+  id                 BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id            BigInt               @db.UnsignedBigInt
+  name               String
+  coin_id            BigInt
+  key                String?
+  type               Int                  @default(1) @db.TinyInt
+  coin_type          String
+  status             Int                  @default(1) @db.TinyInt
+  is_primary         Int                  @default(0) @db.TinyInt
+  balance            Decimal              @default(0.000000000000000000) @db.Decimal(29, 18)
+  created_at         DateTime?            @db.Timestamp(0)
+  updated_at         DateTime?            @db.Timestamp(0)
+  users              users                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "wallets_user_id_foreign")
+  withdraw_histories withdraw_histories[]
+
+  @@unique([user_id, coin_id], map: "wallets_user_id_coin_id_unique")
+}
+
+model websockets_statistics_entries {
+  id                      Int       @id @default(autoincrement()) @db.UnsignedInt
+  app_id                  String
+  peak_connection_count   Int
+  websocket_message_count Int
+  api_message_count       Int
+  created_at              DateTime? @db.Timestamp(0)
+  updated_at              DateTime? @db.Timestamp(0)
+}
+
+model withdraw_histories {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id              BigInt
+  wallet_id            BigInt    @db.UnsignedBigInt
+  amount               Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  btc                  Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  doller               Decimal   @default(0.00000000) @db.Decimal(19, 8)
+  address_type         Int       @db.TinyInt
+  address              String
+  transaction_hash     String
+  coin_type            String    @default("BTC")
+  used_gas             Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  receiver_wallet_id   String?
+  confirmations        String?
+  fees                 Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  status               Int       @default(0) @db.TinyInt
+  network_id           Int?      @db.UnsignedInt
+  base_type            Int?      @db.UnsignedInt
+  memo                 String?
+  automatic_withdrawal String?
+  updated_by           Int?      @db.TinyInt
+  network_type         String?
+  message              String?   @db.LongText
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+  wallets              wallets   @relation(fields: [wallet_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "withdraw_histories_wallet_id_foreign")
+
+  @@index([wallet_id], map: "withdraw_histories_wallet_id_foreign")
+}
+
+model admin_network_balances {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  key_id     String
+  coin_id    Int       @db.UnsignedInt
+  balance    Decimal   @db.Decimal(29, 18)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model admin_wallet_keys {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid           String
+  network_id    Int       @unique(map: "admin_wallet_keys_network_id_unique") @db.UnsignedInt
+  address       String
+  pv            String
+  creation_type Int       @default(1) @db.TinyInt
+  status        Int       @default(1) @db.TinyInt
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+}
+
+model coin_networks {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid                  String
+  network_id           Int       @db.UnsignedInt
+  currency_id          Int       @db.UnsignedInt
+  type                 Int       @db.TinyInt
+  contract_address     String
+  status               Int       @default(1) @db.TinyInt
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+  withdrawal_fees      Decimal   @default(0.000000100000000000) @db.Decimal(29, 18)
+  withdrawal_fees_type Int       @default(2) @db.TinyInt
+}
+
+model network_balances {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  wallet_address_id Int       @db.UnsignedInt
+  coin_network_id   Int       @db.UnsignedInt
+  balance           Decimal   @default(0.000000000000000000) @db.Decimal(29, 18)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model networks {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name               String
+  slug               String    @unique(map: "networks_slug_unique") @db.VarChar(180)
+  description        String?
+  block_confirmation Int?
+  base_type          Int       @db.TinyInt
+  rpc_url            String?
+  wss_url            String?
+  explorer_url       String?
+  chain_id           String?
+  status             Int       @default(1) @db.TinyInt
+  to_block_number    BigInt    @default(0) @db.UnsignedBigInt
+  from_block_number  BigInt    @default(0) @db.UnsignedBigInt
+  logo               String?
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model notified_blocks {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  network_id   Int       @db.UnsignedInt
+  block_number String?
+  node_block   String?
+  error        String?
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model user_withdrawal_addresses {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  uid          String
+  user_id      Int       @db.UnsignedInt
+  label        String?
+  currency_id  Int       @db.UnsignedInt
+  network_id   Int       @db.UnsignedInt
+  address      String
+  is_universal Int       @default(1) @db.TinyInt
+  status       Int       @default(1) @db.TinyInt
+  memo         String?
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model supported_networks {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  type             Int
+  slug             String
+  name             String
+  network_type     Int       @default(1) @db.TinyInt
+  chain_id         Int       @default(0)
+  native_currency  String?
+  base_url         String?
+  token_endpoint   String?
+  address_endpoint String?
+  tx_endpoint      String?
+  gas_limit        String?
+  gas_price        String?
+  status           Int       @default(1) @db.TinyInt
+  is_manually      Boolean   @default(false)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model coin_pair_api_prices {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  pair        String    @db.VarChar(20)
+  buy_price   String    @default("0")
+  buy_amount  String    @default("0")
+  sell_price  String    @default("0")
+  sell_amount String    @default("0")
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model conversation_details {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  sender_id            BigInt?
+  receiver_id          BigInt?
+  conversation_type    Int?      @db.TinyInt
+  conversation_type_id BigInt?
+  message              String?   @db.LongText
+  file_name            String?
+  is_seen              Int       @default(0) @db.TinyInt
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+}
+
+model user_api_white_lists {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id           BigInt    @db.UnsignedBigInt
+  ip_address        String
+  status            Int       @default(1) @db.TinyInt
+  trade_access      Int       @default(1) @db.TinyInt
+  withdrawal_access Int       @default(1) @db.TinyInt
+  number_of_request BigInt    @default(0) @db.UnsignedBigInt
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model user_secret_keys {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id           BigInt    @db.UnsignedBigInt
+  secret_key        String    @unique(map: "user_secret_keys_secret_key_unique")
+  start_date        DateTime  @db.Date
+  expire_date       DateTime? @db.Date
+  status            Int       @default(1) @db.TinyInt
+  number_of_request BigInt    @default(0) @db.UnsignedBigInt
+  target_request    BigInt    @default(0) @db.UnsignedBigInt
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model social_logins {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id      BigInt    @db.UnsignedBigInt
+  userID       Int       @db.UnsignedInt
+  login_type   Int       @db.TinyInt
+  email        String
+  access_token String
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model theme_colors {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  slug       String    @unique(map: "theme_colors_slug_unique") @db.VarChar(100)
+  value      String?   @db.VarChar(10)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+enum coin_pairs_bot_operation {
+  neutral
+  increase
+  decrease
+  random
+}
